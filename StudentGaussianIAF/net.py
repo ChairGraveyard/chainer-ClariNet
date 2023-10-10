@@ -131,10 +131,8 @@ class STFT(chainer.Chain):
 
     def power(self, x):
         real, imag = self(x)
-        power = real ** 2 + imag ** 2
-        return power
+        return real ** 2 + imag ** 2
 
     def magnitude(self, x):
         power = self.power(x)
-        magnitude = F.sqrt(power)
-        return magnitude
+        return F.sqrt(power)

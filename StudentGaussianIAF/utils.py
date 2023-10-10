@@ -15,10 +15,7 @@ class Preprocess(object):
         self.n_mels = n_mels
         self.top_db = top_db
 
-        if length is None:
-            self.length = None
-        else:
-            self.length = length + 1
+        self.length = None if length is None else length + 1
         self.output_dim = 1
 
     def __call__(self, path):

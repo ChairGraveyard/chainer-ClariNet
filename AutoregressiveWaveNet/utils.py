@@ -15,10 +15,7 @@ class Preprocess(object):
         self.n_mels = n_mels
         self.top_db = top_db
 
-        if length is None:
-            self.length = None
-        else:
-            self.length = length + 1
+        self.length = None if length is None else length + 1
         if categorical_output_dim is False or categorical_output_dim is None:
             self.output_dim = 1
         else:
@@ -62,11 +59,10 @@ class Preprocess(object):
 
         if self.output_dim == 1:
             return raw[:, :-1], spectrogram, raw[:, 1:]
-        else:
-            quantized_values = \
+        quantized_values = \
                 numpy.arange(self.output_dim) * 2 / self.output_dim - 1
-            digitized_values = numpy.digitize(raw, quantized_values)
-            return raw[:, :-1], spectrogram, digitized_values[:, 1:]
+        digitized_values = numpy.digitize(raw, quantized_values)
+        return raw[:, :-1], spectrogram, digitized_values[:, 1:]
 
 
 def get_LJSpeech_paths(root):

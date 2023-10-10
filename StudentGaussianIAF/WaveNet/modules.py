@@ -31,11 +31,7 @@ class ResidualBlock(chainer.Chain):
         length = x.shape[2]
 
         # Dropout
-        if self.dropout_zero_rate:
-            h = F.dropout(x, ratio=self.dropout_zero_rate)
-        else:
-            h = x
-
+        h = F.dropout(x, ratio=self.dropout_zero_rate) if self.dropout_zero_rate else x
         # Dilated conv
         h = self.conv(h)
         h = h[:, :, :length]
@@ -152,8 +148,7 @@ class WaveNet(chainer.Chain):
 
         # Output
         z = F.relu(self.proj1(z))
-        y = self.proj2(z)
-        return y
+        return self.proj2(z)
 
     def scalar_to_tensor(self, shapeortensor, scalar):
         if hasattr(shapeortensor, 'shape'):
@@ -183,11 +178,9 @@ class WaveNet(chainer.Chain):
         probs = cdf_plus - cdf_min
         probs = F.maximum(probs, self.scalar_to_tensor(probs, 1e-12))
         if nr_mix == 1:
-            loss = -F.mean(F.log(probs))
-        else:
-            log_probs = F.log_softmax(logits) + F.log(probs)
-            loss = -F.mean(F.logsumexp(log_probs, axis=1))
-        return loss
+            return -F.mean(F.log(probs))
+        log_probs = F.log_softmax(logits) + F.log(probs)
+        return -F.mean(F.logsumexp(log_probs, axis=1))
 
     def calculate_logistic_loss(self, y, t):
         xp = chainer.cuda.get_array_module(t)
@@ -249,8 +242,7 @@ class WaveNet(chainer.Chain):
                 ))
 
         log_probs = log_probs + F.log_softmax(logit_probs)
-        loss = -F.mean(F.logsumexp(log_probs, axis=1))
-        return loss
+        return -F.mean(F.logsumexp(log_probs, axis=1))
 
     def initialize(self, n):
         self.resnet.initialize(n)
